@@ -18,6 +18,7 @@ package org.jboss.arquillian.container.jbossas.remote_4_2;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
 
@@ -43,6 +44,10 @@ import org.jboss.arquillian.core.api.InstanceProducer;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.descriptor.api.Descriptor;
+
+import com.jcraft.jsch.JSchException;
+import com.oneandone.coredev.swistec.soa.test.AbstractIntegrationTest;
+import com.oneandone.coredev.swistec.soa.test.ClusterNode;
 
 /**
  * JBossASRemoteContainer
@@ -133,6 +138,15 @@ public class JBossASRemoteContainer implements DeployableContainer<JBossASConfig
       }
 
       File deployment = ShrinkWrapUtil.toFile(archive);
+      if (Boolean.parseBoolean(System.getProperty("soa.testsuite.copyToRemote", "false"))) {
+          // Arquillian + JBoss 4.2 -> Remote deployer kann keine Deployments hochladen
+          // daher muss die Datei selbst auf den Server gelegt werden 
+          try {
+              copyToRemote(deployment, archive);
+          } catch (Exception e) {
+              throw new DeploymentException(null, e);
+          }
+      }
       targetModuleIDs = deploy(deployment);
 
       try
@@ -144,6 +158,20 @@ public class JBossASRemoteContainer implements DeployableContainer<JBossASConfig
          throw new DeploymentException("Could not extract deployment metadata", e);
       }
    }
+   
+    private void copyToRemote(File localFile, Archive<?> archive) throws IOException, JSchException, URISyntaxException {
+        AbstractIntegrationTest.obtainConfigurationProperties();
+        for (ClusterNode node : AbstractIntegrationTest.getClusterNodes()) {            
+            String user = node.getUserName();
+            if (user == null) {
+                user = System.getProperty("user.name");
+            }
+            String host = node.getHost();
+            // Arquillian legt das local in /tmp, daher muss das auch remote in /tmp
+            new ScpTo().copy(localFile, user + "@" + host + ":/tmp/" + archive.getName());
+        }
+        localFile.deleteOnExit();
+    }
 
    private TargetModuleID[] deploy(File deployment) throws DeploymentException
    {

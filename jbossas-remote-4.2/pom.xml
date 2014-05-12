@@ -14,8 +14,10 @@
 
     <!-- Artifact Configuration -->
     <artifactId>arquillian-jbossas-remote-4.2</artifactId>
+    <groupId>com.oneandone.access.mobile.arquillian.container</groupId>
     <name>Arquillian Container JBoss AS Remote 4.2.x</name>
-    <description>JBoss AS 4.2.x Remote Container integration for the Arquillian Project</description>
+    <version>1.0.0.1and1-soa-SNAPSHOT</version>
+    <description>JBoss AS 4.2.x Remote Container integration for the Arquillian Project; additions for 1&amp;1 SOA platform added</description>
 
     <!-- Properties -->
     <properties>
@@ -24,7 +26,8 @@
         <version.org.jboss.jbossas>4.2.3.GA</version.org.jboss.jbossas>
         <version.dom4j>1.6.1</version.dom4j>
         <version.ejb_api>3.0</version.ejb_api>
-
+        <version.jsch>0.1.50</version.jsch>
+        <version.soatestsupport>1.0.0</version.soatestsupport>
     </properties>
 
     <!-- Dependencies -->
@@ -34,6 +37,16 @@
             <artifactId>dom4j</artifactId>
             <version>${version.dom4j}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>${version.jsch}</version>
+        </dependency>        
+        <dependency>
+            <groupId>com.oneandone.coredev.swistec.soa.test</groupId>
+            <artifactId>soa-test-support</artifactId>
+            <version>${version.soatestsupport}</version>
         </dependency>
 
         <!-- org.jboss.arquillian -->
